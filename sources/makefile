@@ -10,10 +10,10 @@ LD=gcc
 RC=windres -O COFF
 
 #CFLAGS=-O0 -g3 -Wall -fmessage-length=0 -DUSE_CURSES=1 -D_XOPEN_SOURCE_EXTENDED
-CFLAGS=-O0 -g3 -Wall -DUSE_CURSES=1 -D_XOPEN_SOURCE_EXTENDED -DSTDC_HEADERS
+CFLAGS=-O0 -g3 -Wall -DUSE_CURSES=1 -D_XOPEN_SOURCE_EXTENDED -DSTDC_HEADERS -D_INTPTR_T_DEFINED
 #CFLAGS=-O0 -g3 -Wall -DUSE_CURSES=1  -D__EXTENSIONS__
 CXXFLAGS=$(CFLAGS) 
-LDFLAGS=-g -lm
+LDFLAGS=-g -lm -lc -lpcre2-8
 OUTDIR=Debug
 
 ifeq "$(NDEBUG)" "1"
@@ -56,7 +56,8 @@ $(TARGET): $(OBJS)
 
 $(UNIX_TARGET): $(OBJS)
 	@echo 'Building target: $@'
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(UNIXLIBS)
+	$(LD) $(OBJS) -o $@ $(UNIXLIBS) $(LDFLAGS)
+#	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(UNIXLIBS)
 	@echo 'Finished building target: $@'
 	cp $(OUTDIR)/dcl ../
 	@echo ' '

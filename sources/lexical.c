@@ -21,12 +21,14 @@
 #endif
 #include <math.h>
 
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
+
 #include "platform.h"
 #include "dcl.h"
 #include "dcltime.h"
 #include "dclfindfile.h"
 #include "md5.h"
-#include "pcre.h"
 
 #define CPU_REG_KEY     HKEY_LOCAL_MACHINE
 #define CPU_REG_SUBKEY  "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"
@@ -836,7 +838,7 @@ int f_match_wild(char *name, char *value)
     char            work[MAX_TOKEN];
     char            *w;
     char            *ch;
-    pcre            *re;
+    pcre2_code      *re;
     const char         *error;
     int             erroffset;
 
@@ -868,22 +870,23 @@ int f_match_wild(char *name, char *value)
 
     sprintf(value, "\"FALSE\"");
 
-    re = pcre_compile(work, PCRE_CASELESS, &error, &erroffset, NULL);            /* use default character tables */
+    re = pcre2_compile(work, strlen(work), PCRE2_CASELESS, &error, &erroffset, NULL);            /* use default character tables */
     if (re != NULL) {
-        int rc;
-        int ovector[30];
-        rc = pcre_exec(re,             /* result of pcre_compile() */
-                       NULL,           /* we didn't study the pattern */
-                       token1,  /* the subject string */
-                       strlen(token1),             /* the length of the subject string */
-                       0,              /* start at offset 0 in the subject */
-                       0,              /* default options */
-                       ovector,        /* vector of integers for substring information */
-                       30);            /* number of elements (NOT size in bytes) */
+        pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
+
+        int rc = pcre2_match(   re,             /* result of pcre2_compile() */
+                                token1,         /* the subject string */
+                                strlen(token1), /* the length of the subject string */
+                                0,              /* start at offset 0 in the subject */
+                                0,              /* default options */
+                                match_data,
+                                NULL);
         if (rc >= 0) {
             sprintf(value, "\"TRUE\"");
         }
-        pcre_free(re);
+        
+        pcre2_match_data_free(match_data);
+        pcre2_code_free(re);
     }
 
     return(0);
