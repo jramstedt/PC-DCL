@@ -15,6 +15,8 @@
 /*lint -e818 * could be declared as constant*/
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
+#include <stddef.h>
 
 #include "platform.h"
 #include "dcl.h"
@@ -132,7 +134,7 @@ int cmd_prepro(RPARAM_T *rp,RPARAM_T *rq,PARAM_T **p,PARAM_T **q)
 // check and get parameters and qualifiers
 // prompt for missing parameters
 
-int cmd_parse_line(char *cmdline,RPARAM_T *rp,RPARAM_T *rq,PARAM_T *param,PARAM_T *qual)
+int cmd_parse_line(char *cmdline, RPARAM_T *rp, RPARAM_T *rq, PARAM_T *param, PARAM_T *qual)
 {
    char *c = cmdline;
    char token[MAX_TOKEN];
@@ -170,7 +172,7 @@ int cmd_parse_line(char *cmdline,RPARAM_T *rp,RPARAM_T *rq,PARAM_T *param,PARAM_
             default:
                 for (q = 0; qual[q].tag && qual[q].tag != rq[i].tag; q++) ;
                 qual[q].tag = rq[i].tag;
-                strncpy(qual[q].name,rq[i].name,32);
+                strncpy(qual[q].name, rq[i].name, 32);
                 qual[q].flag = rq[i].flag | PRESENT;
                if (qual[q].flag & VALUE) {
                   c = cmd_find_token(c);
@@ -185,7 +187,7 @@ int cmd_parse_line(char *cmdline,RPARAM_T *rp,RPARAM_T *rq,PARAM_T *param,PARAM_
 //         if (!expression) {
             if (p < max_param) {
                 param[p].tag = rp[p].tag;
-                strncpy(param[p].name,rp[p].name,32);
+                strncpy(param[p].name, rp[p].name, 32);
                 param[p].flag = rp[p].flag | PRESENT;
                 param[p].expr = c;
                 c = cmd_get_token(c,param[p].value);
@@ -208,7 +210,7 @@ int cmd_parse_line(char *cmdline,RPARAM_T *rp,RPARAM_T *rq,PARAM_T *param,PARAM_
    // if not, prompt for them if in interactive mode, else abort
 
    for (i = 0; i < max_param && retcod == DCL_OK; i++) {
-      if (rp[i].flag & MANDATORY && *param[i].value == 0) {
+      if (rp[i].flag & MANDATORY && *param[i].value == '\0') {
          if (mode == MODE_INTERACTIVE && D <= 1) {
             param[p].tag = rp[p].tag;
             strncpy(param[p].name,rp[p].name,32);
@@ -237,13 +239,13 @@ int cmd_parse_line(char *cmdline,RPARAM_T *rp,RPARAM_T *rq,PARAM_T *param,PARAM_
 
 int cmd_search_table(char *key)
 {
-    unsigned int    l       = strlen(key);
-    int             i       = 0;
-    int             elem    = 0;
-    int             count   = 0;
+    size_t l       = strlen(key);
+    int    i       = 0;
+    int    elem    = 0;
+    int    count   = 0;
 
     while (command[i].name[0]) {
-        if (strncasecmp(command[i].name,key,l) == 0) {
+        if (strncasecmp(command[i].name, key, l) == 0) {
             elem = i;
             count++;
             }
@@ -322,15 +324,17 @@ char *cmd_get_token(char *str,char *token)
 // -2 if ambiguous key
 //
 
-int cmd_search_qual(RPARAM_T *qual,char *key)
+int cmd_search_qual(RPARAM_T *qual, char *key)
 {
-    unsigned int    l       = strlen(key) - 1;
-    int             i       = 0;
-    int             elem    = 0;
-    int             count   = 0;
+   if (strlen(key) == 0) return AMBIGUOUS;
+
+    size_t l       = strlen(key) - 1;
+    int    i       = 0;
+    int    elem    = 0;
+    int    count   = 0;
 
     while (qual[i].tag) {
-        if (strncasecmp(&qual[i].name[1],&key[1],l) == 0) {
+        if (strncasecmp(&qual[i].name[1], &key[1], l) == 0) {
             elem = i;
             count++;
             }

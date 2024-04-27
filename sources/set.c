@@ -17,6 +17,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #ifdef _WIN32
 #include <direct.h>
@@ -623,7 +624,7 @@ int dcl_set_dosvar(PARAM_T *p, PARAM_T *q)
 {
     char    name[MAX_TOKEN];
     char    value[MAX_TOKEN];
-    char    work[MAX_TOKEN];
+    char    work[MAX_TOKEN + MAX_TOKEN + 8];
     char    *ch;
 
     UNREFERENCED_PARAM(q);
@@ -639,7 +640,7 @@ int dcl_set_dosvar(PARAM_T *p, PARAM_T *q)
     (void)putenv(work);
 #else
     (void)setenv(name, value, 1);
-    (void)sprintf(work,"export %s=%s",name,value);
+    (void)sprintf(work, "export %s=%s", name, value);
     system(work);
 #endif
     return(DCL_OK);

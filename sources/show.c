@@ -16,6 +16,7 @@
 /*lint -e661 off by one */
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <math.h>
 #ifdef _WIN32
@@ -1592,11 +1593,13 @@ int show_system(PARAM_T *p, PARAM_T *q)
     long            elapsed,hour,min,sec;
     char            work[MAX_TOKEN];
     DWORD           size = MAX_TOKEN;
-    int             f_programs     = 1;
-    int             f_drivers     = 0;
+
     int                f_all        = 0;
     int             i             = 0;
 #ifdef _WIN32
+    int             f_programs     = 1;
+    int             f_drivers     = 0;
+
     int             nCount         = 0;
     HMODULE         hPsapi         = NULL;
 #else
@@ -1610,8 +1613,10 @@ int show_system(PARAM_T *p, PARAM_T *q)
         if (q[i].flag & PRESENT)
             switch (q[i].tag) {
             case 1:                                 /* /ALL      */
+#ifdef _WIN32
                 f_programs = 1;
                 f_drivers = 1;
+#endif
                 f_all = 1;
                 break;
 #ifdef _WIN32

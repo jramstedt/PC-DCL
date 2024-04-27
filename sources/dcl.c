@@ -23,6 +23,7 @@
 #endif
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -416,9 +417,9 @@ void dcl_read_kbd(void)
 
 void dcl_read_file(void)
 {
-    unsigned int     i;
-    char             *w;
-    PARAM_T          *p,*q;
+    size_t  i;
+    char    *w;
+    PARAM_T *p, *q;
 
     (void)memset(dcl_line,0,256);
     if (!rcld(cmd[C].cmd,dcl_line,(unsigned)cmd[C].ln)) {
@@ -658,8 +659,8 @@ int dcl_search(char **table,char *key)
             }
         i++;
         }
-    if (count > 1)  return(-2);
-    if (count == 0) return(-1);
+    if (count > 1)  return(AMBIGUOUS);
+    if (count == 0) return(NOT_FOUND);
     return(elem);
 }
 
@@ -674,7 +675,7 @@ int dcl_search_key(char **table,char *key)
             }
         i++;
         }
-    return(-1);
+    return(NOT_FOUND);
 }
 
 void dcl_get_param(char *str,char *param)
@@ -1421,13 +1422,13 @@ int dcl_searchdir(char *szCmd,char *path_name,int subdir,
 {
     DCL_FIND_DATA ff;
     int     ok;
-    char    temp[_MAX_PATH];
+    char    temp[_MAX_DRIVE + _MAX_PATH + _MAX_PATH];
     char    path[_MAX_PATH];
     char    drive[_MAX_DRIVE];
     char    dir[_MAX_DIR];
     char    file[_MAX_FNAME];
     char    ext[_MAX_EXT];
-    int     handle;
+    intptr_t handle;
 
     if (path_name == NULL) {
         return(DCL_ERROR);
@@ -1458,7 +1459,7 @@ int dcl_searchdir(char *szCmd,char *path_name,int subdir,
             }
         }
         else {
-            sprintf(temp,"%s%s%s",drive,dir,ff.cFileName);
+            sprintf(temp, "%s%s%s", drive, dir, ff.cFileName);
             (void)fn(temp,&ff,fn_param, 0);
         }
         ok = Dcl_FindNextFile(handle, &ff);
@@ -1672,29 +1673,29 @@ void dcl_tostring(unsigned long long ull, char *str, size_t size)
         memset(str, ' ', size-1);
         str[p--] = 0;
         while (ull / 10 && p >= 0) {
-            str[p--] = (ull % 10) + 0x30;
+            str[p--] = (char)(ull % 10) + 0x30;
             ull = ull / 10;
         }
         if (p >= 0) {
-            str[p] = (ull % 10) + 0x30;
+            str[p] = (char)(ull % 10) + 0x30;
         }
     }
 }
 
 void dcl_tostring_left(unsigned long long ull, char *str, size_t size)
 {
-    int     p1 = (int)size - 1;
-    int     p2 = 0;
+    ptrdiff_t     p1 = size - 1;
+    ptrdiff_t     p2 = 0;
 
     if (str != NULL && size > 1) {
         memset(str, ' ', size-1);
         str[p1--] = 0;
         while (ull / 10 && p1 >= 0) {
-            str[p1--] = (ull % 10) + 0x30;
+            str[p1--] = (char)(ull % 10) + 0x30;
             ull = ull / 10;
         }
         if (p1 >= 0) {
-            str[p1] = (ull % 10) + 0x30;
+            str[p1] = (char)(ull % 10) + 0x30;
         }
     }
     for(p1 = 0; str[p1] && str[p1] == ' '; p1++);

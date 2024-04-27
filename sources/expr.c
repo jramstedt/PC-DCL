@@ -13,7 +13,9 @@
 /****************************************************************************/
 #include <ctype.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include "platform.h"
 #include "dcl.h"
 
@@ -95,16 +97,14 @@ int EXP_expression(char *result)
 {
     long    n = 0;
     int     oper;
-    char    *s1 = (char *) malloc(EXP_MAX);
-    char    *s2 = (char *) malloc(EXP_MAX);
+    char    *s1 = (char *) calloc(EXP_MAX, sizeof(char));
+    char    *s2 = (char *) calloc(EXP_MAX, sizeof(char));
 
     if (s1 == NULL || s2 == NULL) {
         free(s1); free(s2);
         fprintf(stderr,"FATAL ERROR - EX0004\n");
         return(-1);
-        }
-    memset(s1, 0, sizeof(s1));
-    memset(s2, 0, sizeof(s2));
+    }
 
     EXP_term(s1);
     while (EXP_token == EXP_TOK_PLUS ||
@@ -566,7 +566,7 @@ int str_reduce(char *s1, char *s2)
 {
     char    *c1 = s1;
     char    *c2;
-    int     l;
+    size_t  l;
 
     l = strlen(s2);
     while(*c1 && strncasecmp(c1,s2,l)) c1++;
@@ -581,9 +581,9 @@ int str_reduce(char *s1, char *s2)
 
 long EXP_octal(char *str)
 {
-    long result     = 0;
-    int i           = 0;
-    int j           = 0;
+    long result = 0;
+    ptrdiff_t i    = 0;
+    size_t j    = 0;
 
     for (i = strlen(str)-1; i >= 0; i--) {
         result += (str[i]-48) * EXP_ipow(8,j++);
@@ -593,9 +593,9 @@ long EXP_octal(char *str)
 
 long EXP_hexa(char *str)
 {
-    long result     = 0;
-    int i           = 0;
-    int j           = 0;
+    long result = 0;
+    ptrdiff_t i    = 0;
+    size_t j    = 0;
 
     for (i = strlen(str)-1; i >= 0; i--) {
         str[i] = toupper(str[i]);
@@ -608,7 +608,7 @@ long EXP_hexa(char *str)
     return(result);
 }
 
-long EXP_ipow(int i,int j)
+long EXP_ipow(const int i,int j)
 {
     long result = 1;
 

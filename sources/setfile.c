@@ -149,7 +149,7 @@ int dcl_set_file(PARAM_T *p,PARAM_T *q)
 int dclsetf_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     SETF_PARAM *setf_param;
-    char temp[MAX_TOKEN];
+    char temp[MAX_TOKEN + 10];
     char vms[MAX_TOKEN];
 
     if (path == NULL)     return(DCL_ERROR);
@@ -167,7 +167,7 @@ int dclsetf_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 
     cvfs_dos_to_vms(path,vms);
     if (setf_param->confirm) {
-        sprintf(temp,"Set file %s",vms);
+        sprintf(temp, "Set file %s", vms);
         switch (dcl_confirm(temp)){
             case CONFIRM_YES    :   setf_param->ok = 1;
                                     break;

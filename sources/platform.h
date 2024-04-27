@@ -33,6 +33,12 @@ char *strupr(char *s);
 
 #define INVALID_HANDLE_VALUE    -1
 
+#define _mkdir(a)      	mkdir(a, 0777)
+#define _rmdir(a)       rmdir(a)
+#define _getcwd(a,b)    getcwd(a,b)
+#define _sleep(a)		sleep(a)
+#define MAX_PATH		PATH_MAX
+
 /*
 typedef unsigned char       BYTE;
 typedef float               FLOAT;
@@ -52,6 +58,7 @@ typedef void far            *LPVOID;
 typedef CONST void far      *LPCVOID;
 */
 
+#include "findfile.h"
 #include "splitpath.h"
 
 #endif

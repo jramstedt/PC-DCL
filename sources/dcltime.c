@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include "platform.h"
 #include "dcltime.h"
@@ -46,7 +47,7 @@ static int DM[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
 void tm_str_to_long(char *str, time_t *ttime)
 {
     char    work[MAX_TOKEN];
-    char    temp[MAX_TOKEN];
+    char    temp[MAX_TOKEN + 1];
     char    *s;
     char    *w;
     int     i = 0;
@@ -64,11 +65,14 @@ void tm_str_to_long(char *str, time_t *ttime)
     st = localtime(&tt);
 
     *work = 0;
-    strncpy(temp,str,MAX_TOKEN);
+    *temp = 0;
+
+    strncpy(temp, str, MAX_TOKEN);
+
     s = temp;
     if (!*s) {
         strcpy(temp,"NOW");
-        }
+    }
 
     while (*s && *s == ' ') s++;
 

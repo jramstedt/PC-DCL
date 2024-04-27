@@ -176,7 +176,7 @@ void tio_close(void)
 {
 }
 
-int	 tio_get_one_line(char *buffer, size_t len, int timeout, Flist stack)
+int tio_get_one_line(char *buffer, size_t len, time_t timeout, Flist stack)
 {
 	int	ret = 0;
 	int	go 	= 1;

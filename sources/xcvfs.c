@@ -16,7 +16,7 @@
 /*lint -e661 off by one */
 
 #include <string.h>
-#include <unistd.h>
+#include <strings.h>
 
 #include "platform.h"
 #include "dcl.h"

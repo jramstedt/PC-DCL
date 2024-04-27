@@ -29,7 +29,6 @@ int dcl_wait(PARAM_T *p,PARAM_T *q)
     char            delta[MAX_TOKEN];
     time_t          time_u = 0;
     time_t          time_stop = 0;
-    time_t          tl;
     int             retcod  = 0;
 
     NEXT_LINE();
@@ -38,7 +37,6 @@ int dcl_wait(PARAM_T *p,PARAM_T *q)
     if (p == NULL || q == NULL) return(DCL_ERROR);
 
     *delta  = 0;
-    tl      = 0;
 
     (void) cmd_parse_line(dcl_line,WAIT_PARAM,DUMMY_QUAL,p,q);
     dcl_string(p[0].value,delta,MAX_TOKEN);

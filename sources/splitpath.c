@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /** small helper function, copies only a part of a string into another
  * (we append a 0 in contrary to strncpy)
  */
-static inline void strcpypart(char *dest, char *src, size_t size)
+static inline void strcpypart(char* const dest, const char* const src, size_t size)
 {
     memcpy(dest, src, size);
     dest[size] = 0;
@@ -35,14 +35,15 @@ static inline void strcpypart(char *dest, char *src, size_t size)
 /** Unix version of the _splitpath functions which breaks a path into it's
  * components. (Warning: Don't use in your own code, you're asking for security
  * problems (buffer overflow)
+ * 
+ * https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/splitpath-wsplitpath
  */
-void _splitpath(char *path, char *drive, char *dir,
-                char *fname, char *ext)
+void _splitpath(const char* const path, char* const drive, char* const dir, char* const fname, char* const ext)
 {
-	char *p 		= 0;
-    char *lastslash = 0;
-    char *lastdot 	= 0;
-    char *begin 	= 0;
+	const char *p 	= 0;
+    const char *lastslash = 0;
+    const char *lastdot 	= 0;
+    const char *begin 	= 0;
 	
     // Step1: Fill in drive ("" on unix systems since we don't have drives)
     if(drive)
@@ -84,7 +85,10 @@ void _splitpath(char *path, char *drive, char *dir,
     //		drive, dir, fname, ext);
 }
 
-void _makepath(char *path, char *drive, char *dir, char *fname, char *ext)
+/*
+ https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/makepath-wmakepath
+*/
+void _makepath(char *path, const  char *drive, const char *dir, const char *fname, const  char *ext)
 {
 	size_t	len = 0;
 	

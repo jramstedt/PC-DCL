@@ -15,9 +15,10 @@
 /*lint -e818 * could be declared as constant*/
 
 //#include <direct.h>
-#include <unistd.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <stdlib.h>
 
@@ -121,7 +122,7 @@ int dcl_delete(PARAM_T *p,PARAM_T *q)
     return(retcod);
 }
 //===========================================================================
-int dcl_del_file(PARAM_T *p,PARAM_T *q)
+int dcl_del_file(PARAM_T *p, PARAM_T *q)
 {
     DEL_PARAM del_param;
     char    vms[MAX_TOKEN];
@@ -143,7 +144,7 @@ int dcl_del_file(PARAM_T *p,PARAM_T *q)
     del_param.since = 0;
     del_param.ok = 1;
 
-    retcod = cmd_parse_line(dcl_line,DELETE_PARAM,DELETE_QUAL,p,q);
+    retcod = cmd_parse_line(dcl_line, DELETE_PARAM,DELETE_QUAL, p, q);
 
     if (retcod == DCL_OK) {
         for (i = 0; q[i].tag; i++) {
@@ -153,9 +154,10 @@ int dcl_del_file(PARAM_T *p,PARAM_T *q)
                         del_param.all = TRUE;
                         break;
                     case 4:                                 /* /BEFORE  */
-                        if (q[i].value == 0)
-                            strcpy(q[i].value,"TODAY");
-                        tm_str_to_long(q[i].value,&del_param.before);
+                        if (*q[i].value == '\0')
+                            strcpy(q[i].value, "TODAY");
+                        
+                        tm_str_to_long(q[i].value, &del_param.before);
                         break;
                     case 5:                                 /* /CONFIRM */
                         del_param.confirm = TRUE;
@@ -176,9 +178,10 @@ int dcl_del_file(PARAM_T *p,PARAM_T *q)
                         del_param.log = FALSE;
                         break;
                     case 12:                                 /* /SINCE  */
-                        if (q[i].value == 0)
-                            strcpy(q[i].value,"TODAY");
-                        tm_str_to_long(q[i].value,&del_param.since);
+                        if (*q[i].value == '\0')
+                            strcpy(q[i].value, "TODAY");
+
+                        tm_str_to_long(q[i].value, &del_param.since);
                         break;
                     case 13:                                 /* /SUBDIR  */
                         recurse = TRUE;
@@ -225,7 +228,7 @@ int dcldelf_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param)
 {
     DEL_PARAM *del_param = (DEL_PARAM *) fn_param;
     char vms[MAX_TOKEN];
-    char msg[MAX_TOKEN];
+    char msg[MAX_TOKEN + 7];
     int  retcod = DCL_OK;
 
     if (ff->dwFileAttributes & _A_SUBDIR) {
@@ -248,7 +251,8 @@ int dcldelf_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param)
 
     cvfs_dos_to_vms(path,vms);
     if (del_param->confirm) {
-        sprintf(msg,"delete %s",vms);
+        sprintf(msg, "delete %s", vms);
+
         switch (dcl_confirm(msg)){
             case CONFIRM_YES    :   del_param->ok = 1;
                                     break;
@@ -279,7 +283,7 @@ int dcldelf_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param)
     else {
         if (del_param->erase){
             int handle;
-            long l,fl;
+            unsigned long l,fl;
             char fillbuf[2] = {0x00,0x00};
             fillbuf[0] = (char) 255;
 /*            if ((handle = open(path,O_RDWR+O_BINARY)) == -1) {*/
@@ -528,18 +532,18 @@ int dcl_del_searchdir(char *cmd,char *path,int subdir,
                       void *fn_param)
 {
     DCL_FIND_DATA ff;
-    int     ok;
-    int     rc;
-    char    *fname = (char *) calloc(1,_MAX_PATH);
-    char    *spath = (char *) calloc(1,_MAX_PATH);
-    char    *temp  = (char *) calloc(1,_MAX_PATH);
-    char    *sub   = (char *) calloc(1,_MAX_PATH);
-    char    *drive = (char *) calloc(1,_MAX_DRIVE);
-    char    *dir   = (char *) calloc(1,_MAX_DIR);
-    char    *dir0  = (char *) calloc(1,_MAX_DIR);
-    char    *file  = (char *) calloc(1,_MAX_FNAME);
-    char    *ext   = (char *) calloc(1,_MAX_EXT);
-    int     handle;
+    int           ok;
+    int           rc;
+    char          *fname = (char *) calloc(1, _MAX_PATH);
+    char          *spath = (char *) calloc(1, _MAX_PATH);
+    char          *temp  = (char *) calloc(1, _MAX_PATH);
+    char          *sub   = (char *) calloc(1, _MAX_PATH);
+    char          *drive = (char *) calloc(1, _MAX_DRIVE);
+    char          *dir   = (char *) calloc(1, _MAX_DIR);
+    char          *dir0  = (char *) calloc(1, _MAX_DIR);
+    char          *file  = (char *) calloc(1, _MAX_FNAME);
+    char          *ext   = (char *) calloc(1, _MAX_EXT);
+    intptr_t      handle;
 
 //    _splitpath(strupr(path),drive,dir,file,ext);
     _splitpath(path,drive,dir,file,ext);

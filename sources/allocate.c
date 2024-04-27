@@ -63,8 +63,8 @@ int dcl_allocate(PARAM_T *p,PARAM_T *q)
             } /* end if */
         }   /* end for */
 
-        dcl_string(p[0].value,devnam,MAX_TOKEN);
-        dcl_string(p[1].value,lognam,MAX_TOKEN);
+        dcl_string(p[0].value, devnam, MAX_TOKEN);
+        dcl_string(p[1].value, lognam, MAX_TOKEN);
 
         if (lognam[strlen(lognam)-1] == ':')
             lognam[strlen(lognam)-1] = 0;

@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdint.h>
 
-static const int COPYBUFFSZ = 4096;
+static size_t COPYBUFFSZ = 4096;
 
 int filecopy(const char *fn_src, const char *fn_dst, int bFailIfExists)
 {
-	int   bytesr;
+	size_t   bytesr;
 	int   retval  = 0;
 	FILE  *fh_src = NULL;
 	FILE  *fh_dst = NULL;

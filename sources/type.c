@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <strings.h>
 #include <errno.h>
 
 #include "platform.h"
@@ -213,9 +213,9 @@ static int dcltype_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     PARAM *type_param;
     FILE *fp;
-    char buffer[MAX_TOKEN+2];
+    char buffer[MAX_TOKEN + 2];
     char vms[MAX_TOKEN];
-    char msg[MAX_TOKEN];
+    char msg[MAX_TOKEN + 6];
     int  line   = 0;
     int  row    = terminfo.Size.Y;
     int  column = terminfo.Size.X;

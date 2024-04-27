@@ -38,21 +38,14 @@ void tio_gotoxy(int x, int y)
     refresh();
 }
 
-int tio_wherex(void)
+short tio_wherex(void)
 {
-    int     x = 0;
-    int     y = 0;
-    getyx(stdscr, y, x);
-    return(x);
+    return getcurx(stdscr);
 }
 
-
-int tio_wherey(void)
+short tio_wherey(void)
 {
-    int     y = 0;
-    int     x = 0;
-    getyx(stdscr, y, x);
-    return(y);
+    return getcury(stdscr);
 }
 
 void tio_init_term(void)
@@ -234,13 +227,14 @@ void tio_close(void)
 {
     endwin();
 }
-int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
+
+int tio_get_one_line(char *buffer, size_t maxlen, time_t timeout, Flist stack)
 {
     int  insert_mode = default_insert_mode;
-    int  cc = 0;
+    size_t  cc = 0;
     int  ch;
-    int  pos = 0;
-    int  i  = 0;
+    size_t  pos = 0;
+    size_t  i  = 0;
     int  go_on = 1;
     int  sx;
     int  sy;
@@ -251,7 +245,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
     char    szSearch[256];
     char    szDrive[_MAX_DRIVE];
     char    szDir[_MAX_DIR];
-    int    handle = (int)INVALID_HANDLE_VALUE;
+    intptr_t    handle = INVALID_HANDLE_VALUE;
     DCL_FIND_DATA    ff;
 
     CTRL_Y = 0;
@@ -261,13 +255,13 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
 
     sx = tio_wherex();
     sy = tio_wherey();
-    cc = (int)strlen(buffer);
-    if (cc < 0) cc = 0;
+    cc = strlen(buffer);
     pos = cc;
+    
     (void)tio_clreol();
     (void)tio_gotoxy(sx, sy);
     (void)tio_printf("%s",buffer);
-    (void)tio_gotoxy(sx + pos, sy);
+    (void)tio_gotoxy(sx + (int)pos, sy);
 
     if (timeout) {
         go_on = tio_wait_for_char(timeout);
@@ -299,12 +293,12 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                 if (! nextdptr(stack,buffer)) {
                     *buffer = 0;
                 }
-                cc = (int) strlen(buffer);
+                cc = strlen(buffer);
                 pos=cc;
                 (void)tio_gotoxy(sx, sy);
                 (void)tio_clreol();
                 (void)tio_printf("%s",buffer);
-                (void)tio_gotoxy(sx + pos, sy);
+                (void)tio_gotoxy(sx + (int)pos, sy);
                 break;
         /******  CTRL C, CTRL Y  (Interrupt)  ******/
         case CTRL('C'):
@@ -320,21 +314,21 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
         case KEY_LEFT :
                 if (pos > 0) {
                     --pos;
-                    (void)tio_gotoxy(sx + pos, sy);
+                    (void)tio_gotoxy(sx + (int)pos, sy);
                 }
                 break;
         /******  CTRL E (End of line)  ******/
         case CTRL('E'):
         case KEY_END :
                 pos=cc;
-                (void)tio_gotoxy(sx + pos, sy);
+                (void)tio_gotoxy(sx + (int)pos, sy);
                 break;
         /******  CTRL F (Right arrow)  ******/
         case CTRL('F'):
         case KEY_RIGHT :
                 if (pos < cc) {
                     ++pos;
-                    (void)tio_gotoxy(sx + pos, sy);
+                    (void)tio_gotoxy(sx + (int)pos, sy);
                 }
                 break;
         /******  backspace key  ******/
@@ -346,10 +340,10 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                     --cc;
                     buffer[cc]=0x00;
                     --pos;
-                    (void)tio_gotoxy(sx + pos, sy);
+                    (void)tio_gotoxy(sx + (int)pos, sy);
                     (void)tio_clreol();
                     (void)tio_printf("%s",&buffer[pos]);
-                    (void)tio_gotoxy(sx + pos, sy);
+                    (void)tio_gotoxy(sx + (int)pos, sy);
                 }
                 break;
         /******  TAB key  ******/
@@ -393,7 +387,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                     (void)tio_gotoxy(sx, sy);
                     (void)tio_clreol();
                     (void)tio_printf("%s",buffer);
-                    (void)tio_gotoxy(sx + pos, sy);
+                    (void)tio_gotoxy(sx + (int)pos, sy);
                 }
                 break;
         /******  CTRL K, erase end of line  ******/
@@ -422,7 +416,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                         if (stoptime == time(NULL) || stoptime == 0) {
                             (void)tio_gotoxy(0, sy - 1);
                             tio_print_status();
-                            (void)tio_gotoxy(sx + pos, sy);
+                            (void)tio_gotoxy(sx + (int)pos, sy);
                             stoptime = time(NULL) + 1;
                         }
                     }
@@ -479,12 +473,12 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
         case KEY_DOWN :
                 if (! prevdptr(stack,buffer))
                     *buffer = 0;
-                cc = (int)strlen(buffer);
+                cc = strlen(buffer);
                 pos=cc;
                 (void)tio_gotoxy(sx, sy);
                 (void)tio_clreol();
                 (void)tio_printf("%s",buffer);
-                (void)tio_gotoxy(sx + pos, sy);
+                (void)tio_gotoxy(sx + (int)pos, sy);
                 break;
         default:
                 /* TEST FKEY F1..F12 SF1..SF12 */
@@ -495,12 +489,12 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                         if (keydef[i].erase){
                             *buffer = 0;
                             strcpy(buffer,keydef[i].value);
-                            cc = (int)strlen(buffer);
+                            cc = strlen(buffer);
                             pos = cc;
                         }
                         else {
                             char *p;
-                            int  j;
+                            size_t  j;
                             if (insert_mode){
                                 p = keydef[i].value;
                                 strcpy(wrk,&buffer[pos]);
@@ -513,7 +507,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                                 strcpy(wrk,&buffer[pos]);
                                 for(j=0; j < maxlen && *p; buffer[j++] = *p++) ;
                             }
-                            cc = (int)strlen(buffer);
+                            cc = strlen(buffer);
                         }
                         if (keydef[i].echo){
                             (void)tio_gotoxy(sx, sy);
@@ -521,7 +515,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                             (void)tio_gotoxy(sx, sy);
                             (void)tio_printf("%s",buffer);
                             pos = cc;
-                            (void)tio_gotoxy(sx + pos, sy);
+                            (void)tio_gotoxy(sx + (int)pos, sy);
                         }
                         if (keydef[i].terminate){
                             go_on = 0;
@@ -545,7 +539,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                                 buffer[pos] = (char)ch;
                                 ++cc;
                                 buffer[cc] = 0x00;
-                                (void)tio_gotoxy(sx + pos, sy);
+                                (void)tio_gotoxy(sx + (int)pos, sy);
                                 (void)tio_printf("%s",&buffer[pos]);
                             }
                             else {
@@ -553,7 +547,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
                                 (void)tio_putch(ch);
                             }
                         ++pos;
-                        (void)tio_gotoxy(sx + pos, sy);
+                        (void)tio_gotoxy(sx + (int)pos, sy);
                     }
                 }
         }                                   /*  end switch    */

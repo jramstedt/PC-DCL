@@ -115,8 +115,8 @@ int dcl_copy(PARAM_T *p,PARAM_T *q)
                     cop_param.all = TRUE;
                     break;
                 case 2:                                 /* /BEFORE  */
-                    if (!*q[i].value) strcpy(q[i].value,"TODAY");
-                    tm_str_to_long(q[i].value,&cop_param.before);
+                    if (!*q[i].value) strcpy(q[i].value, "TODAY");
+                    tm_str_to_long(q[i].value, &cop_param.before);
                     break;
                 case 3:                                 /*  /CONFIRM */
                     cop_param.confirm = 1;
@@ -134,8 +134,8 @@ int dcl_copy(PARAM_T *p,PARAM_T *q)
                     cop_param.fnew = 1;
                     break;
                 case 8:                                 /*  /SINCE  */
-                    if (!*q[i].value) strcpy(q[i].value,"TODAY");
-                    tm_str_to_long(q[i].value,&cop_param.since);
+                    if (!*q[i].value) strcpy(q[i].value, "TODAY");
+                    tm_str_to_long(q[i].value, &cop_param.since);
                     break;
                 case 9:                                 /*  /SUBDIR */
                     cop_param.recurse = 1;
@@ -185,7 +185,7 @@ int dcl_copy(PARAM_T *p,PARAM_T *q)
 int dclcopy_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     COP_PARAM *cop_param = (COP_PARAM *) fn_param;
-    char temp[MAX_TOKEN];
+    char temp[MAX_TOKEN + 5];
     char vms[MAX_TOKEN];
     int  retcod = 0;
 
@@ -209,7 +209,8 @@ int dclcopy_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 
     cvfs_dos_to_vms(path,vms);
     if (cop_param->confirm) {
-        sprintf(temp,"Copy %s",vms);
+        sprintf(temp, "Copy %s", vms);
+
         switch (dcl_confirm(temp)){
             case CONFIRM_YES    :   cop_param->ok = 1;
                                     break;

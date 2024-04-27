@@ -304,7 +304,7 @@ void tio_close(void)
 
 }
 
-int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
+int  tio_get_one_line(char *buffer, size_t maxlen, time_t timeout, Flist stack)
 {
     int  insert_mode = default_insert_mode;
     int  cc = 0;
@@ -321,7 +321,7 @@ int  tio_get_one_line(char *buffer, size_t maxlen, int timeout, Flist stack)
     char    szSearch[256];
     char    szDrive[_MAX_DRIVE];
     char    szDir[_MAX_DIR];
-    int    handle = (int)INVALID_HANDLE_VALUE;
+    intptr_t    handle = (int)INVALID_HANDLE_VALUE;
     DCL_FIND_DATA    ff;
 
     CTRL_Y = 0;

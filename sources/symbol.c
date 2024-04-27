@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include "platform.h"
 #include "dcl.h"
@@ -103,7 +104,7 @@ int symbol_put(char *name,char *value,int level)
 	j = 0;
     while (!found && s <= (int)nempty(dcl[level].symbol_list)) {
         if (rcld(dcl[level].symbol_list,&tmp,(unsigned)s)) {
-            if (strncasecmp(tname,tmp.name,SYMBOL_MAX_NAME) == 0) {
+            if (strncasecmp(tname, tmp.name, SYMBOL_MAX_NAME) == 0) {
 				if (substring) {
 					valuelen = (int) strlen(tmp.value);
 					while(i < offset && i < SYMBOL_MAX_VALUE) {
@@ -138,7 +139,7 @@ int symbol_put(char *name,char *value,int level)
 	    s++;
         }
     if (!found) {
-        strncpy(tmp.name,tname,SYMBOL_MAX_NAME);
+        strncpy(tmp.name, tname, SYMBOL_MAX_NAME);
         i = j = 0;
         if (substring) {
             while(i < offset && i < SYMBOL_MAX_VALUE) {
@@ -156,7 +157,7 @@ int symbol_put(char *name,char *value,int level)
             }
         }
         else {
-            strncpy(tmp.value,value,SYMBOL_MAX_VALUE);
+            strncpy(tmp.value, value, SYMBOL_MAX_VALUE);
         }
         tmp.minlen = minlen;
         tmp.type = type;

@@ -3,19 +3,14 @@
 
 
 // unix emulation code for the win32 _splitpath function
-// Warning: don't use this function in your own code, you're asking for secutiry
+// Warning: don't use this function in your own code, you're asking for security
 // problems (buffer overflow)
 
 #ifndef WIN32
-#define _mkdir(a)      	mkdir(a, 0777)
-#define _rmdir(a)       rmdir(a)
-#define _getcwd(a,b)    getcwd(a,b)
-#define _sleep(a)		sleep(a)
-#define MAX_PATH		PATH_MAX
-void _splitpath(char *path, char *drive, char *dir,
-                char *fname, char *ext);
 
-void _makepath(char *path, char *drive, char *dir, char *fname, char *ext);
+void _splitpath(const char* const path, char *drive, char *dir, char *fname, char *ext);
+
+void _makepath(char* path, const  char *drive, const  char *dir, const  char *fname, const  char *ext);
 
 #endif
 

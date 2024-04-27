@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef _WIN32
 //#pragma message "Compiling for WIN32"
 #elif defined __linux
@@ -10,9 +12,8 @@ ERROR
 #include "platform.h"
 #include <time.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <stdint.h>
 #include "flexlist.h"
-#include "findfile.h"
 
 #ifdef _WIN32
 #include <tlhelp32.h>
@@ -114,7 +115,7 @@ typedef struct _DCL_FIND_DATA {
     time_t          CreationTime;
     time_t          AccessTime;
     time_t          WriteTime;
-    DWORD           nFileSize;
+    _fsize_t        nFileSize;
     char            cFileName[_MAX_PATH];
     char            cAlternateFileName[14];
 } DCL_FIND_DATA, *LPDCL_FIND_DATA;
@@ -155,9 +156,9 @@ typedef struct {
     }  DCL;
 
 typedef struct {
-    char    filespec[MAX_TOKEN];
-    struct  _finddata_t ffblk;
-    long    handle;
+    char               filespec[MAX_TOKEN];
+    struct _finddata_t ffblk;
+    intptr_t           handle;
     } SEARCH;
 
 typedef struct {
@@ -275,7 +276,7 @@ int  dclini(int argc,char **argv);
 char *EXP_compute(char *str,char *result);
 int  EXP_isnumber(char *s);
 void init_term(void);
-int  kbdread(char *buffer,int maxlen,Flist stack,long timeout);
+int  kbdread(char *buffer, size_t maxlen, Flist stack, time_t timeout);
 int  f_lexical(char *name,char *value);
 int  logical_put(char *name,char *value,int system_flag);
 int  logical_put_file(char *name,char *value,int system_flag,int filenum,char mode,

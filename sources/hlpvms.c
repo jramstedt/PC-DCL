@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 
 #include "platform.h"
@@ -67,7 +68,7 @@ int hlpvms(char *help_file)
 {
     char    buffer[MAX_BUF + 1];
     char    in_line[MAX_BUF + 1];
-    char    choice[80];
+    char    choice[16];
     int     i = 0;
     int     iline = 0;
     int     itop = 0;
@@ -264,7 +265,7 @@ label_60:
 
         nline = 0;
         memset(choice, 0, sizeof(choice));
-        (void) kbdread(choice,16,data_stack,0);
+        (void) kbdread(choice, sizeof(choice), data_stack, INFINITE_TIMEOUT);
         hlp_trim_blank(choice);
         lenc = (int)strlen(choice);
         tio_clrscr();

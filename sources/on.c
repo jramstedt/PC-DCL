@@ -13,6 +13,7 @@
 /****************************************************************************/
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include "platform.h"
 #include "dcl.h"

@@ -22,7 +22,7 @@
 #include "termio.h"
 
 
-int kbdread(char *buffer,int maxlen,Flist stack,long timeout)
+int kbdread(char *buffer, size_t maxlen, Flist stack, time_t timeout)
 {
     int  cc = 0;
     char wrk[256];

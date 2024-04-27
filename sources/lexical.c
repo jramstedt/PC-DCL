@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
 #ifndef _WIN32
@@ -322,7 +323,7 @@ int f_cunits(char *name, char *value)
         return(DCL_ERROR);
     }
 
-    dnum = num * 512;
+    dnum = (double)(num * 512);
     strcpy(unit, "");
 
     if (dnum > 1024) {
@@ -839,8 +840,8 @@ int f_match_wild(char *name, char *value)
     char            *w;
     char            *ch;
     pcre2_code      *re;
-    const char         *error;
-    int             erroffset;
+    int             error;
+    PCRE2_SIZE      erroffset;
 
     if (name == NULL || value == NULL) return(DCL_ERROR);
 
@@ -870,15 +871,15 @@ int f_match_wild(char *name, char *value)
 
     sprintf(value, "\"FALSE\"");
 
-    re = pcre2_compile(work, strlen(work), PCRE2_CASELESS, &error, &erroffset, NULL);            /* use default character tables */
+    re = pcre2_compile((PCRE2_SPTR)work, strlen(work), PCRE2_CASELESS, &error, &erroffset, NULL);            /* use default character tables */
     if (re != NULL) {
         pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(re, NULL);
 
-        int rc = pcre2_match(   re,             /* result of pcre2_compile() */
-                                token1,         /* the subject string */
-                                strlen(token1), /* the length of the subject string */
-                                0,              /* start at offset 0 in the subject */
-                                0,              /* default options */
+        int rc = pcre2_match(   re,                 /* result of pcre2_compile() */
+                                (PCRE2_SPTR)token1, /* the subject string */
+                                strlen(token1),     /* the length of the subject string */
+                                0,                  /* start at offset 0 in the subject */
+                                0,                  /* default options */
                                 match_data,
                                 NULL);
         if (rc >= 0) {
@@ -1406,19 +1407,19 @@ int f_environment(char *name, char *value)
 
 int f_file_attributes(char *name, char *value)
 {
-    char    item[MAX_TOKEN];
-    char    work[MAX_TOKEN];
-    char    vms[MAX_TOKEN];
-    char    dos[MAX_TOKEN];
-    char    drive[_MAX_DRIVE];
-    char    dir[_MAX_DIR];
-    char    ext[_MAX_EXT];
-    char    *w;
-    char    *ch;
-    int     retcod  = 0;
-    int     i;
+    char          item[MAX_TOKEN];
+    char          work[MAX_TOKEN];
+    char          vms[MAX_TOKEN];
+    char          dos[MAX_TOKEN];
+    char          drive[_MAX_DRIVE];
+    char          dir[_MAX_DIR];
+    char          ext[_MAX_EXT];
+    char          *w;
+    char          *ch;
+    int           retcod  = 0;
+    int           i;
     DCL_FIND_DATA ff;
-    int     handle;
+    intptr_t      handle;
 
     if (name == NULL || value == NULL) return(DCL_ERROR);
 

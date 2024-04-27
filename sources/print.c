@@ -175,7 +175,7 @@ int dcl_print(PARAM_T *p,PARAM_T *q)
 int dclprint_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     PRI_PARAM *pri_param;
-    char temp[MAX_TOKEN];
+    char temp[MAX_TOKEN + 6];
     char vms[MAX_TOKEN];
     int  retcod = 0;
 
@@ -203,7 +203,7 @@ int dclprint_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 
     cvfs_dos_to_vms(path,vms);
     if (pri_param->confirm) {
-        sprintf(temp,"Print %s",vms);
+        sprintf(temp,"Print %s", vms);
         switch (dcl_confirm(temp)){
             case CONFIRM_YES    :   pri_param->ok = 1;
                                     break;

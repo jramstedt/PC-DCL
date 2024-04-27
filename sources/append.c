@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include "platform.h"
@@ -166,7 +166,7 @@ int dcl_append(PARAM_T *p,PARAM_T *q)
 int dclappend_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     APP_PARAM *app_param;
-    char temp[MAX_TOKEN];
+    char temp[MAX_TOKEN + 7];
     char vms[MAX_TOKEN];
     int  retcod = DCL_OK;
 
@@ -192,25 +192,27 @@ int dclappend_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 
     app_param->file_nb++;
 
-    cvfs_dos_to_vms(path,vms);
+    cvfs_dos_to_vms(path, vms);
     if (app_param->confirm) {
-        sprintf(temp,"Append %s",vms);
+
+        sprintf(temp, "Append %s", vms);
+
         switch (dcl_confirm(temp)){
-        case CONFIRM_YES    :   app_param->ok = 1;
-                                break;
-        case CONFIRM_ALL    :   app_param->ok = 1;
-                                app_param->confirm = 0;
-                                break;
-        case CONFIRM_QUIT   :   app_param->ok = 0;
-                                app_param->confirm = 0;
-                                break;
-        default             :   app_param->ok = 0;
+            case CONFIRM_YES    :   app_param->ok = 1;
+                                    break;
+            case CONFIRM_ALL    :   app_param->ok = 1;
+                                    app_param->confirm = 0;
+                                    break;
+            case CONFIRM_QUIT   :   app_param->ok = 0;
+                                    app_param->confirm = 0;
+                                    break;
+            default             :   app_param->ok = 0;
         }
     }
     if (app_param->ok) {
         retcod = vms_append(vms,app_param->vms,app_param->binary);
         if (app_param->log && !retcod && !HARDERR)
-            (void) dcl_printf(dcl[D].SYS_OUTPUT,"%s appended to %s.\n",vms,app_param->vms);
+            (void) dcl_printf(dcl[D].SYS_OUTPUT, "%s appended to %s.\n", vms,app_param->vms);
     }
 
 exit_label:

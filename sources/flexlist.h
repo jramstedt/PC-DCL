@@ -1,13 +1,5 @@
 
-
-//#ifndef _SIZE_T_DEFINED
-//typedef unsigned int   size_t;
-//#define _SIZE_T_DEFINED
-//#endif
-
 typedef int FlistData;      /* force host alignment */
-
-
 
 typedef struct FlistNode  *FlistN;
 
@@ -15,8 +7,6 @@ struct  FlistNode {
   FlistN        next, prev;
   FlistData     data;
 };
-
-
 
 struct FlistHeader  {
   FlistN    front,  current, rear;

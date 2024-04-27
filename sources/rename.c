@@ -150,7 +150,7 @@ exit_label:
 int dclrename_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 {
     REN_PARAM *ren_param;
-    char temp[MAX_TOKEN];
+    char temp[MAX_TOKEN + 8];
     char vms[MAX_TOKEN];
 
     if (path     == NULL) return(DCL_ERROR);
@@ -173,7 +173,7 @@ int dclrename_do_it(char *path,DCL_FIND_DATA *ff,void *fn_param, char bdir)
 
     cvfs_dos_to_vms(path,vms);
     if (ren_param->confirm) {
-        sprintf(temp,"Rename %s",vms);
+        sprintf(temp, "Rename %s", vms);
         switch (dcl_confirm(temp)){
             case CONFIRM_YES    :   ren_param->ok = 1;
                                     break;

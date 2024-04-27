@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
 #ifdef _WIN32
@@ -87,11 +88,11 @@ typedef struct {
     int     col_counter;
     int     file_counter;
     int     dir_counter;
-    long    tot_size;
+    unsigned long    tot_size;
     int     gt_file_counter;
-    long    gt_tot_size;
+    unsigned long    gt_tot_size;
     char    page;
-    char    line_counter;
+    short   line_counter;
     char    order;
     } PARAM;
 
@@ -107,9 +108,9 @@ int dir_sort_e(const void *a,const void *b);
 int dir_sort_s(const void *a,const void *b);
 int dir_sort_d(const void *a,const void *b);
 void dcldir_searchdir(char * name,int subdir,PARAM *dir_param);
-int dcldir_do_it(char *drive,char *dir,char *name,
-                 time_t time_create,time_t time_access,time_t time_write,
-                 unsigned long fsize,unsigned int fattrib,PARAM *dir_param);
+int dcldir_do_it(char *drive, char *dir, char *name,
+                 time_t time_create, time_t time_access, time_t time_write,
+                 _fsize_t fsize, DWORD fattrib, PARAM *dir_param);
 void linefeed(PARAM *dir_param);
 void dir_printfilename(FILE *fp, char *format, char *filename);
 int handler(int errval,int ax,int bp,int si);
@@ -164,8 +165,8 @@ int dcl_dir(PARAM_T *p,PARAM_T *q)
                     dir_param.full = 0;
                     break;
                 case 3:                                 /* /BEFORE  */
-                    if (!*q[i].value) strcpy(q[i].value,"TODAY");
-                    tm_str_to_long(q[i].value,&dir_param.before);
+                    if (!*q[i].value) strcpy(q[i].value, "TODAY");
+                    tm_str_to_long(q[i].value, &dir_param.before);
                     break;
                 case 4:                                 /*  /BRIEF  */
                     dir_param.brief = 1;
@@ -232,8 +233,8 @@ int dcl_dir(PARAM_T *p,PARAM_T *q)
                     *vms = 0;
                     break;
                 case 12:                            /*  /SINCE  */
-                    if (!*q[i].value) strcpy(q[i].value,"TODAY");
-                    tm_str_to_long(q[i].value,&dir_param.since);
+                    if (!*q[i].value) strcpy(q[i].value, "TODAY");
+                    tm_str_to_long(q[i].value ,&dir_param.since);
                     break;
                 case 13:                            /*  /SIZE   */
                     if (!*q[i].value) strcpy(q[i].value,"BYTES");
@@ -378,50 +379,49 @@ ExitLabel:
 
 //============================================================================
 
-void dcldir_searchdir(char * name,int subdir,PARAM *dir_param)
+void dcldir_searchdir(char * name, int subdir, PARAM *dir_param)
 {
     DCL_FIND_DATA ff;
-    int     ok;
-    int     handle;
-    int     attrib = _A_SUBDIR;
-    int     i = 0;
-    int     n = 0;
-    int     d = 0;
-    char    temp[_MAX_PATH];
-    char    path[_MAX_PATH];
-    char    drive[_MAX_DRIVE];
-    char    dir[_MAX_DIR];
-    char    file[_MAX_FNAME];
-    char    ext[_MAX_EXT];
+    int      ok;
+    intptr_t handle;
+    size_t   i = 0;
+    size_t   maxFiles = 0;
+    size_t   numFiles = 0;
+    char     temp[_MAX_PATH];
+    char     path[_MAX_PATH];
+    char     drive[_MAX_DRIVE];
+    char     dir[_MAX_DIR];
+    char     file[_MAX_FNAME];
+    char     ext[_MAX_EXT];
     DCL_FIND_DATA *dd;
     size_t  s;
 
-    n = 1024;
-    do
-        {
-        dd = (DCL_FIND_DATA *) calloc(n,sizeof(ff));
-        if (dd == NULL) n /= 2;
-        }
-    while (n >= 128 && dd == NULL);
-    if (dd == NULL){
+    maxFiles = 2048;
+    do {
+        dd = (DCL_FIND_DATA *) calloc(maxFiles, sizeof(ff));
+        if (dd == NULL) maxFiles /= 2;
+    } while (maxFiles >= 128 && dd == NULL);
+
+    if (dd == NULL) {
         dcl_printf(dcl[D].SYS_OUTPUT,"ERROR - DIR002\n");
         _SEVERITY = 4;
         _STATUS = 8;
         return;
-        }
+    }
 
-    strcpy(path,name);
+    strcpy(path, name);
+
     //for (i = 0; i < (int) strlen(path); i++)
     //    path[i] = toupper(path[i]);
-    if (dir_param->all)
-        attrib = attrib + _A_HIDDEN + _A_SYSTEM;
-    _splitpath(path,drive,dir,file,ext);
+
+    _splitpath(path, drive, dir, file, ext);
     if (strlen(file) == 0)
-        strcat(path,"*");
+        strcat(path, "*");
+
 //    if (strlen(ext) == 0)
 //        strcat(path,".*");
-    handle = Dcl_FindFirstFile(path,&ff);
-    ok = handle == (int)INVALID_HANDLE_VALUE ? 0 : 1;
+    handle = Dcl_FindFirstFile(path, &ff);
+    ok = handle == INVALID_HANDLE_VALUE ? 0 : 1;
     dir_param->dir_counter++;
     dir_param->file_counter = 0;
     dir_param->col_counter = 0;
@@ -432,7 +432,7 @@ void dcldir_searchdir(char * name,int subdir,PARAM *dir_param)
     }
     while (ok) {
         _splitpath(path,drive,dir,file,ext);
-        if (strlen(drive)==0 && strlen(dir)==0) {
+        if (strlen(drive) == 0 && strlen(dir) == 0) {
            if (_getcwd(temp,_MAX_PATH) != NULL) {
                s = strlen(temp)-1;
            }
@@ -442,16 +442,19 @@ void dcldir_searchdir(char * name,int subdir,PARAM *dir_param)
            if (temp[s] != SLASH_CHR) {
               strcat(temp,SLASH_STR);
               _splitpath(temp,drive,dir,file,ext);
-              }
-           }
-        if ((unsigned long)ff.WriteTime >= (unsigned long)dir_param->since &&
-            (unsigned long)ff.WriteTime <  (unsigned long)dir_param->before)
-            {
-            if (d < n){
-               memcpy(&dd[d],&ff,sizeof(ff));
-               d++;
-               }
             }
+        }
+        
+        int isAfter = difftime(ff.WriteTime, dir_param->since) >= 0.0;
+        int isBefore = dir_param->before > -1 ? difftime(ff.WriteTime, dir_param->before) < 0.0 : TRUE;
+        
+        if (isAfter && isBefore)
+        {
+            if (numFiles < maxFiles){
+               memcpy(&dd[numFiles], &ff, sizeof(ff));
+               numFiles++;
+            }
+        }
         ok = Dcl_FindNextFile(handle, &ff);
         if (CTRL_Y) {
             ok = 0;
@@ -464,32 +467,40 @@ void dcldir_searchdir(char * name,int subdir,PARAM *dir_param)
         return;
     }
 
-    --d;
-    if (d) {
+    if (numFiles > 1) {
         switch (dir_param->order) {
             case O_NAME:
-                //for(i = 0; i < d; printf("%s\n",dd[i++].cFileName));
-                qsort((DCL_FIND_DATA*) dd,d+1,sizeof(DCL_FIND_DATA),dir_sort_n);
-                //for(i = 0; i < d; printf("%s\n",dd[i++].cFileName));
+                //for(i = 0; i < numFiles; printf("%s\n",dd[i++].cFileName));
+                qsort(dd, numFiles, sizeof(DCL_FIND_DATA), dir_sort_n);
+                //for(i = 0; i < numFiles; printf("%s\n",dd[i++].cFileName));
                 break;
             case O_EXTENSION:
-                qsort((DCL_FIND_DATA*) dd,d+1,sizeof(DCL_FIND_DATA),dir_sort_e);
+                qsort(dd, numFiles, sizeof(DCL_FIND_DATA), dir_sort_e);
                 break;
             case O_SIZE:
-                qsort((DCL_FIND_DATA*) dd,d+1,sizeof(DCL_FIND_DATA),dir_sort_s);
+                qsort(dd, numFiles, sizeof(DCL_FIND_DATA), dir_sort_s);
                 break;
             case O_DATE:
-                qsort((DCL_FIND_DATA*) dd,d+1,sizeof(DCL_FIND_DATA),dir_sort_d);
+                qsort(dd, numFiles, sizeof(DCL_FIND_DATA), dir_sort_d);
                 break;
             default:
                 ;
         }
     }
 
-    for(i = 0;i <= d;i++) {
-        dcldir_do_it(drive,dir,dd[i].cFileName,dd[i].CreationTime,dd[i].AccessTime,dd[i].WriteTime,dd[i].nFileSize,
-            dd[i].dwFileAttributes,dir_param);
+    for(i = 0; i < numFiles; i++) {
+        dcldir_do_it(
+            drive,
+            dir,
+            dd[i].cFileName,
+            dd[i].CreationTime,
+            dd[i].AccessTime,
+            dd[i].WriteTime,
+            dd[i].nFileSize,
+            dd[i].dwFileAttributes,
+            dir_param);
     }
+
     if (CTRL_Y) {
         free(dd);
         return;
@@ -596,11 +607,11 @@ int dir_sort_s(const void *p1,const void *p2)
 {
     DCL_FIND_DATA  *a = (DCL_FIND_DATA *) p1;
     DCL_FIND_DATA  *b = (DCL_FIND_DATA *) p2;
-    int            i  = 0;
+    int       i  = 0;
 
-    i = a->nFileSize - b->nFileSize;
+    i = (int)(a->nFileSize - b->nFileSize);
     if (i) return(i);
-    return(strcasecmp(a->cFileName,b->cFileName));
+    return(strcasecmp(a->cFileName, b->cFileName));
 }
 int dir_sort_d(const void *p1,const void *p2)
 {
@@ -616,24 +627,24 @@ int dir_sort_d(const void *p1,const void *p2)
 
 }
 
-int dcldir_do_it(char *drive,char *dir,char *name,
-                 time_t time_create,time_t time_access,time_t time_write,
-                 unsigned long fsize,unsigned int fattrib,PARAM *dir_param)
+int dcldir_do_it(char* drive, char* dir, char* name,
+                 time_t time_create, time_t time_access, time_t time_write,
+                 _fsize_t fsize, DWORD fattrib, PARAM *dir_param)
 {
     char    temp[MAX_TOKEN];
     char    vms[MAX_TOKEN];
     char    longname[MAX_TOKEN];
     char    shortname[MAX_TOKEN];
-    char    xname[MAX_TOKEN];
+    char    xname[MAX_TOKEN + 2];
     char    xattr[5];
-    long    sz = 0;
+    _fsize_t    sz = 0;
 #ifdef _WIN32
     DCL_FIND_DATA FindFileData;
     int     handle;
 #endif
 
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) {
-        (void) logical_get("INI$FTYPE",INI_VALUE);
+        (void) logical_get("INI$FTYPE", INI_VALUE);
         if (INI_VALUE[0] == 'V') {
             return(DCL_OK);
         }
@@ -675,26 +686,26 @@ int dcldir_do_it(char *drive,char *dir,char *name,
         strcpy(shortname, FindFileData.cAlternateFileName);
     else
 #endif
-        strcpy(shortname,name);
+        strcpy(shortname, name);
 
     if (dir_param->heading) {
         if (fattrib & _A_SUBDIR) {
-            sprintf(xname,"[%s]",shortname);
+            sprintf(xname, "[%s]", shortname);
             strcpy(shortname, xname);
-            sprintf(xname,"[%s]",name);
+            sprintf(xname, "[%s]", name);
             strcpy(name, xname);
         }
     }
 
     if (dir_param->brief) {
         if (!dir_param->total) {
-            int len = strlen(name);
-            int col_inc = len / 15;
+            size_t len = strlen(name);
+            size_t col_inc = len / 15;
             int col_width = (col_inc * 15) + 15;
             char wrk[256];
             snprintf(wrk, 256,"%-*.*s",col_width,col_width,name);
             dir_printfilename(dir_param->output,"%s",wrk);
-            dir_param->col_counter += col_inc;
+            dir_param->col_counter += (int)col_inc;
         }
         if (dir_param->col_counter >= dir_param->cols) {
             if (!dir_param->total)
@@ -873,10 +884,10 @@ int diskinfo(char *drive,DISKINFO *di)
 	char	name[MAX_TOKEN];
 	char    type[MAX_TOKEN];
 	char    mount[MAX_TOKEN];
-	int		blocks		= 0;
-	long	used 		= 0;
-	long	available 	= 0;
-	int 	pct 		= 0;
+	unsigned long long blocks		= 0;
+	unsigned long long used 		= 0;
+	unsigned long long available 	= 0;
+	unsigned long pct 		= 0;
 	int		rc 			= 0;
 	char	df[MAX_TOKEN];
 
@@ -888,7 +899,7 @@ int diskinfo(char *drive,DISKINFO *di)
 	if (fp != NULL) {
     	while(fgets(line, sizeof(line), fp))  {
     		if (*line == '/') {
-            	rc = sscanf(line, "%s %s %d %ld %ld %d%% %s ",
+            	rc = sscanf(line, "%s %s %llu %llu %llu %lu%% %s ",
             			name, type, &blocks, &used, &available, &pct, mount);
             	if (rc > 0) {
             		di->Available1kBlocks = available;

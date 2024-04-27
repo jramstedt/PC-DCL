@@ -16,7 +16,9 @@
 //#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "platform.h"
 #include "dcl.h"

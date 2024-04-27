@@ -14,6 +14,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include "platform.h"
 #include "dcl.h"
@@ -32,20 +33,20 @@ RPARAM_T HELP_PARAM[] = {
 
 int dcl_help(PARAM_T *p,PARAM_T *q)
 {
-    char    helpdir[MAX_TOKEN];
-    char    temp[MAX_TOKEN];
-    char    buffer[MAX_TOKEN];
-    char    token[MAX_TOKEN];
-    char	topic[MAX_TOPICS][MAX_TOKEN];
-    int		count  	= 0;
-    int     retcod 	= DCL_OK;
-    int     recurse = 0;
-    long   	handle;
+    char        helpdir[MAX_TOKEN];
+    char        temp[MAX_TOKEN];
+    char        buffer[MAX_TOKEN + MAX_TOKEN + 6];
+    char        token[MAX_TOKEN];
+    char        topic[MAX_TOPICS][MAX_TOKEN];
+    unsigned short count  	= 0;
+    int         retcod 	= DCL_OK;
+    int         recurse = 0;
+    intptr_t    handle;
     struct 	_finddata_t ffblk;
-	int 	i 		= 0;
-	int		pos		= 0;
-	int		w		= 0;
-    int		loop    = 0;
+	int         i       = 0;
+	int	        pos	    = 0;
+	int	        w       = 0;
+    int	        loop    = 0;
 
     NEXT_LINE();
     if (cmd[C].subr) return(DCL_OK);
@@ -59,6 +60,7 @@ int dcl_help(PARAM_T *p,PARAM_T *q)
         dcl_string(p[0].value,token,MAX_TOKEN);
         (void) logical_get("SYS$HELPDIR",temp);
         cvfs_vms_to_dos(temp,helpdir, &recurse);
+        
         if (helpdir[strlen(helpdir)-1] != SLASH_CHR) {
             strcat(helpdir, SLASH_STR);
         }
@@ -67,7 +69,7 @@ int dcl_help(PARAM_T *p,PARAM_T *q)
 //        }
         sprintf(buffer, "%s%s*.hlp", helpdir, token);
         handle = _findfirst(buffer,&ffblk);
-        while (handle != -1) {
+        while (handle != -1 && count < MAX_TOPICS) {
         	_splitpath(ffblk.name, NULL, NULL, topic[count], NULL);
         	count++;
         	if (_findnext(handle, &ffblk) == -1) {
@@ -108,13 +110,13 @@ int dcl_help(PARAM_T *p,PARAM_T *q)
         	while(loop) {
         		dcl_printf(dcl[D].SYS_OUTPUT,"\nEnter topic you want help on, or RETURN ");
         		memset(buffer, 0, sizeof(buffer));
-        		(void) kbdread(buffer,MAX_TOKEN,data_stack,0);
+        		(void) kbdread(buffer,MAX_TOKEN,data_stack, INFINITE_TIMEOUT);
         		if (*buffer == 0) {
         			break;
         		}
         		for (i = 0; i < count; i++) {
         			if (strncasecmp(topic[i], buffer, strlen(buffer)) == 0) {
-            			sprintf(buffer,"%s%s.hlp", helpdir, topic[i]);
+            			sprintf(buffer, "%s%s.hlp", helpdir, topic[i]);
             			retcod = hlpvms(buffer);
             			loop = 0;
         				break;
