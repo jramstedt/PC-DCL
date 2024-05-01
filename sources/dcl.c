@@ -348,6 +348,10 @@ void dcl_init_default_logicals(void)
     strcpy(value,"SYS$OUTPUT");
     (void)logical_put(name,value,LOG_SYSTEM);
 
+    strcpy(name,"SYS$ERROR");
+    strcpy(value,"SYS$OUTPUT");
+    (void)logical_put(name,value,LOG_SYSTEM);
+
 #ifdef _WIN32
     strcpy(name,"SYS$DISK");
     value[0] = (char)(_getdrive() + 64);

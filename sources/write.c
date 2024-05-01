@@ -47,7 +47,7 @@ int dcl_write(PARAM_T *p, PARAM_T *q)
     char    temp[MAX_TOKEN];
     char    *w;
     int     i = 0;
-    char    openmode;
+    char    open_mode;
     int     filenum;
     int     retcod  = 0;
     int     recl    = 0;
@@ -133,26 +133,21 @@ int dcl_write(PARAM_T *p, PARAM_T *q)
         *expr = 0;
 
     filenum = -1;
+    logical_get_file(lognam,token,&filenum,&open_mode,&recl,&rptr,&wptr);
 
-    if (strcasecmp(lognam,"SYS$INPUT")==0) {
+    if (filenum == -1)
+        fp = NULL;
+    else
+        fp = dclfile[filenum];
+
+    if (strcasecmp(token,"SYS$INPUT")==0) {
         fp = dcl[D].SYS_INPUT;
-        openmode = OPEN_MODE_READ;
-        strcpy(token, lognam);
+        open_mode = OPEN_MODE_READ;
     }
-    else if (strcasecmp(lognam,"SYS$OUTPUT")==0) {
+    else if (strcasecmp(token,"SYS$OUTPUT")==0) {
         fp = dcl[D].SYS_OUTPUT;
-        openmode = OPEN_MODE_WRITE;
-        strcpy(token, lognam);
+        open_mode = OPEN_MODE_WRITE;
     }
-    else {
-        logical_get_file(lognam,token,&filenum,&openmode,&recl,&rptr,&wptr);
-
-        if (filenum == -1)
-            fp = NULL;
-        else
-            fp = dclfile[filenum];
-    }
-
 
     if (fp == NULL) {
         if (!*err_label)
@@ -163,7 +158,7 @@ int dcl_write(PARAM_T *p, PARAM_T *q)
         goto exit_label;
     }
 
-    if (!((openmode & OPEN_MODE_WRITE) || (openmode & OPEN_MODE_APPEND))) {
+    if (!((open_mode & OPEN_MODE_WRITE) || (open_mode & OPEN_MODE_APPEND))) {
         if (!*err_label)
             (void) dcl_printf(dcl[D].SYS_OUTPUT,"File %s not open in WRITE mode.\n",lognam);
         _SEVERITY = 2;
@@ -203,7 +198,7 @@ int dcl_write(PARAM_T *p, PARAM_T *q)
         }
     }
     wptr = ftell(fp);
-    (void) logical_put_file(lognam,token,LOG_USER,filenum,openmode,recl,rptr,wptr);
+    (void) logical_put_file(lognam,token,LOG_USER,filenum,open_mode,recl,rptr,wptr);
 
 exit_label:
 

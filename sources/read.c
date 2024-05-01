@@ -118,11 +118,11 @@ int dcl_read(PARAM_T *p,PARAM_T *q)
     if (strcasecmp(token,"SYS$INPUT")==0) {
         fp = dcl[D].SYS_INPUT;
         open_mode = OPEN_MODE_READ;
-        }
+    }
     if (strcasecmp(token,"SYS$OUTPUT")==0) {
         fp = dcl[D].SYS_OUTPUT;
         open_mode = OPEN_MODE_READ;
-        }
+    }
     
     if (fp == NULL) {
         if (!*err_label)
